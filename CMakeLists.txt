@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(PATCH_VERSION "3" CACHE INTERNAL "Patch version")
+set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
-project(ipfilter VERSION ${PROJECT_VESRION})
+project(ip_filter VERSION ${PROJECT_VESRION})
 
 add_executable(ip_filter ip_filter.cpp)
 
