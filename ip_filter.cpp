@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <array>
 
 // ("",  '.') -> [""]
 // ("11", '.') -> ["11"]
@@ -12,56 +13,60 @@
 // (".11", '.') -> ["", "11"]
 // ("11.22", '.') -> ["11", "22"]
 
-using FilterHandler = bool(*)(const std::vector<std::string>& ip);
-
+using FilterHandler = bool(*)(const std::array<uint8_t, 4>& ip);
 
 auto split(const std::string &str, char d)
 {
     std::vector<std::string> r;
-
     std::string::size_type start = 0;
     std::string::size_type stop = str.find_first_of(d);
     while(stop != std::string::npos)
     {
         r.push_back(str.substr(start, stop - start));
-
         start = stop + 1;
         stop = str.find_first_of(d, start);
     }
-
     r.push_back(str.substr(start));
-
     return r;
 }
 
-void read(std::vector<std::vector<std::string>>& ip_pool) {
+auto strToNum(const std::vector<std::string>& vectror) {
+    std::array<uint8_t, 4> ip;
+    for(uint8_t i = 0; i < ip.size(); ++i) {
+        ip[i] = std::stoi(vectror[i]);
+    }
+    return ip;
+}
+
+void read(std::vector<std::array<uint8_t, 4>>& ip_pool) {
     for(std::string line; std::getline(std::cin, line);) {
         auto v = split(line, '\t');
-        ip_pool.push_back(split(v.at(0), '.'));
+        ip_pool.push_back(strToNum(split(v.at(0), '.')));
     }
 }
 
-void write(const std::vector<std::vector<std::string>>& ip_pool, FilterHandler filter) {
-    for(auto ip = ip_pool.cbegin(); ip != ip_pool.cend(); ++ip) {
+void write(const std::vector<std::array<uint8_t, 4>>& ip_pool, FilterHandler filter) {
+    for(auto ip = ip_pool.begin(); ip != ip_pool.end(); ++ip) {
         if (filter(*ip)) {
-            for(auto ip_part = ip->cbegin(); ip_part != ip->cend(); ++ip_part) {
-                if (ip_part != ip->cbegin()) {
+            for(auto ip_part = ip->begin(); ip_part != ip->end(); ++ip_part) {
+                if (ip_part != ip->begin()) {
                     std::cout << ".";
                 }
-                std::cout << *ip_part;
+                std::cout << unsigned(*ip_part);
             }
             std::cout << std::endl;
         }       
     }
 }
 
-void sort(std::vector<std::vector<std::string>>& ip_pool) {
+
+void sort(std::vector<std::array<uint8_t, 4>>& ip_pool) {
     std::sort(ip_pool.begin(), ip_pool.end(), [](const auto& ip1, const auto& ip2) {       
         for (uint8_t i = 0; i < std::min(ip1.size(), ip2.size()); ++i) {
-            if (std::stoi(ip1[i]) == std::stoi(ip2[i])) {
+            if (ip1[i] == ip2[i]) {
                 continue;
             }
-            return std::stoi(ip1[i]) > std::stoi(ip2[i]);
+            return ip1[i] > ip2[i];
         }
         return false;
     });
@@ -71,22 +76,22 @@ int main(int argc, char const *argv[])
 {
     try
     {
-        std::vector<std::vector<std::string>> ip_pool;
+        std::vector<std::array<uint8_t, 4>> ip_pool;
         read(ip_pool);
         sort(ip_pool);
-        write(ip_pool, [](const std::vector<std::string>& ip) {
+        write(ip_pool, [](const std::array<uint8_t, 4>& ip) {
             return true;
         });
-        write(ip_pool, [](const std::vector<std::string>& ip) {
-            return std::stoi(ip[0]) == 1;
+        write(ip_pool, [](const std::array<uint8_t, 4>& ip) {
+            return ip[0] == 1;
         });
-        write(ip_pool, [](const std::vector<std::string>& ip) {
-            return std::stoi(ip[0]) == 46 &&
-            std::stoi(ip[1]) == 70;
+        write(ip_pool, [](const std::array<uint8_t, 4>& ip) {
+            return ip[0] == 46 &&
+                ip[1] == 70;
         });
-        write(ip_pool, [](const std::vector<std::string>& ip) {
-            auto result = std::find_if(ip.begin(), ip.end(), [](const auto& str) {
-                return std::stoi(str) == 46;
+        write(ip_pool, [](const std::array<uint8_t, 4>& ip) {
+            auto result = std::find_if(ip.begin(), ip.end(), [](const auto& ip_part) {
+                return ip_part == 46;
             });
             return result != ip.end();
         });
